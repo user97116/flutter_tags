@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
@@ -30,8 +30,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  TabController _tabController;
-  ScrollController _scrollViewController;
+  TabController? _tabController;
+  ScrollController? _scrollViewController;
 
   final List<String> _list = [
     '0',
@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage>
     _items = _list.toList();
   }
 
-  List _items;
+  List _items = [];
 
   final GlobalKey<TagsState> _tagStateKey = GlobalKey<TagsState>();
 
@@ -134,8 +134,8 @@ class _MyHomePageState extends State<MyHomePage>
                     Container(
                       decoration: BoxDecoration(
                           border: Border(
-                              bottom: BorderSide(
-                                  color: Colors.grey[300], width: 0.5))),
+                              bottom:
+                                  BorderSide(color: Colors.grey, width: 0.5))),
                       margin:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: ExpansionTile(
@@ -336,8 +336,8 @@ class _MyHomePageState extends State<MyHomePage>
                     Container(
                       decoration: BoxDecoration(
                           border: Border(
-                              bottom: BorderSide(
-                                  color: Colors.grey[300], width: 0.5))),
+                              bottom:
+                                  BorderSide(color: Colors.grey, width: 0.5))),
                       margin:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: ExpansionTile(
@@ -451,7 +451,7 @@ class _MyHomePageState extends State<MyHomePage>
                     Padding(
                       padding: EdgeInsets.all(20),
                     ),
-                    _tags2,
+                    // _tags2,
                     Container(
                         padding: EdgeInsets.all(20),
                         child: Column(
@@ -490,7 +490,7 @@ class _MyHomePageState extends State<MyHomePage>
           index: index,
           title: item,
           pressEnabled: true,
-          activeColor: Colors.blueGrey[600],
+          activeColor: Colors.blueGrey,
           singleItem: _singleItem,
           splashColor: Colors.green,
           combine: ItemTagsCombine.withTextBefore,
@@ -535,20 +535,19 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   // Position for popup menu
-  Offset _tapPosition;
+  Offset? _tapPosition;
 
   Widget get _tags2 {
+    print("AMAR: ${context.findRenderObject()}");
     //popup Menu
-    final RenderBox overlay = Overlay.of(context).context?.findRenderObject();
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
 
     ItemTagsCombine combine = ItemTagsCombine.onlyText;
 
     switch (_itemCombine) {
       case 'onlyText':
         combine = ItemTagsCombine.onlyText;
-        break;
-      case 'onlyIcon':
-        combine = ItemTagsCombine.onlyIcon;
         break;
       case 'onlyIcon':
         combine = ItemTagsCombine.onlyIcon;
@@ -566,7 +565,6 @@ class _MyHomePageState extends State<MyHomePage>
         combine = ItemTagsCombine.withTextBefore;
         break;
     }
-
     return Tags(
       key: Key("2"),
       symmetry: _symmetry,
@@ -587,7 +585,7 @@ class _MyHomePageState extends State<MyHomePage>
             index: index,
             title: item,
             pressEnabled: false,
-            activeColor: Colors.green[400],
+            activeColor: Colors.green,
             combine: combine,
             image: index > 0 && index < 5
                 ? ItemTagsImage(image: AssetImage("img/p$index.jpg"))
@@ -619,31 +617,29 @@ class _MyHomePageState extends State<MyHomePage>
           onTapDown: (details) => _tapPosition = details.globalPosition,
           onLongPress: () {
             showMenu(
-                    //semanticLabel: item,
-                    items: <PopupMenuEntry>[
-                  PopupMenuItem(
-                    child: Text(item, style: TextStyle(color: Colors.blueGrey)),
-                    enabled: false,
+              //semanticLabel: item,
+              items: <PopupMenuEntry>[
+                PopupMenuItem(
+                  child: Text(item, style: TextStyle(color: Colors.blueGrey)),
+                  enabled: false,
+                ),
+                PopupMenuDivider(),
+                PopupMenuItem(
+                  value: 1,
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.content_copy),
+                      Text("Copy text"),
+                    ],
                   ),
-                  PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 1,
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.content_copy),
-                        Text("Copy text"),
-                      ],
-                    ),
-                  ),
-                ],
-                    context: context,
-                    position: RelativeRect.fromRect(
-                        _tapPosition & Size(40, 40),
-                        Offset.zero &
-                            overlay
-                                .size) // & RelativeRect.fromLTRB(65.0, 40.0, 0.0, 0.0),
-                    )
-                .then((value) {
+                ),
+              ],
+              context: context,
+              position: RelativeRect.fromRect(
+                _tapPosition! & Size(40, 40),
+                Offset.zero & overlay.size,
+              ),
+            ).then((value) {
               if (value == 1) Clipboard.setData(ClipboardData(text: item));
             });
           },

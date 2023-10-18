@@ -8,32 +8,27 @@ import 'package:flutter_tags/src/suggestions_textfield.dart';
 typedef Widget ItemBuilder(int index);
 
 class Tags extends StatefulWidget {
-  Tags(
-      {this.columns,
-      this.itemCount = 0,
-      this.symmetry = false,
-      this.horizontalScroll = false,
-      this.heightHorizontalScroll = 60,
-      this.spacing = 6,
-      this.runSpacing = 14,
-      this.alignment = WrapAlignment.center,
-      this.runAlignment = WrapAlignment.center,
-      this.direction = Axis.horizontal,
-      this.verticalDirection = VerticalDirection.down,
-      this.textDirection = TextDirection.ltr,
-      this.itemBuilder,
-      this.textField,
-      Key key})
-      : assert(itemCount >= 0),
-        assert(alignment != null),
-        assert(runAlignment != null),
-        assert(direction != null),
-        assert(verticalDirection != null),
-        assert(textDirection != null),
+  Tags({
+    this.columns,
+    this.itemCount = 0,
+    this.symmetry = false,
+    this.horizontalScroll = false,
+    this.heightHorizontalScroll = 60,
+    this.spacing = 6,
+    this.runSpacing = 14,
+    this.alignment = WrapAlignment.center,
+    this.runAlignment = WrapAlignment.center,
+    this.direction = Axis.horizontal,
+    this.verticalDirection = VerticalDirection.down,
+    this.textDirection = TextDirection.ltr,
+    required this.itemBuilder,
+    this.textField,
+    Key? key,
+  })  : assert(itemCount >= 0),
         super(key: key);
 
   ///specific number of columns
-  final int columns;
+  final int? columns;
 
   ///numer of item List
   final int itemCount;
@@ -76,7 +71,7 @@ class Tags extends StatefulWidget {
   final ItemBuilder itemBuilder;
 
   /// custom TextField
-  final TagsTextField textField;
+  final TagsTextField? textField;
 
   @override
   TagsState createState() => TagsState();
@@ -87,7 +82,7 @@ class TagsState extends State<Tags> {
   Orientation _orientation = Orientation.portrait;
   double _width = 0;
 
-  final List<DataList> _list = List();
+  final List<DataList> _list = [];
 
   List<Item> get getAllItem => _list.toList();
 
@@ -96,7 +91,7 @@ class TagsState extends State<Tags> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final keyContext = _containerKey.currentContext;
       if (keyContext != null) {
-        final RenderBox box = keyContext.findRenderObject();
+        final RenderBox box = keyContext.findRenderObject() as RenderBox;
         final size = box.size;
         setState(() {
           _width = size.width;
@@ -155,15 +150,15 @@ class TagsState extends State<Tags> {
     /*if(_list.length < widget.itemCount)
             _list.clear();*/
 
-    final Widget textField = widget.textField != null
+    final Widget? textField = widget.textField != null
         ? Container(
             alignment: Alignment.center,
-            width: widget.symmetry ? _widthCalc() : widget.textField.width,
-            padding: widget.textField.padding,
+            width: widget.symmetry ? _widthCalc() : widget.textField!.width,
+            padding: widget.textField!.padding,
             child: SuggestionsTextField(
-              tagsTextField: widget.textField,
+              tagsTextField: widget.textField!,
               onSubmitted: (String str) {
-                if (!widget.textField.duplicates) {
+                if (!widget.textField!.duplicates) {
                   final List<DataList> lst =
                       _list.where((l) => l.title == str).toList();
 
@@ -173,14 +168,13 @@ class TagsState extends State<Tags> {
                   }
                 }
 
-                if (widget.textField.onSubmitted != null)
-                  widget.textField.onSubmitted(str);
+                widget.textField!.onSubmitted!(str);
               },
             ),
           )
         : null;
 
-    List<Widget> finalList = List();
+    List<Widget> finalList = [];
 
     List<Widget> itemList = List.generate(widget.itemCount, (i) {
       final Widget item = widget.itemBuilder(i);
@@ -232,9 +226,13 @@ class TagsState extends State<Tags> {
 
 /// Inherited Widget
 class DataListInherited extends InheritedWidget {
-  DataListInherited(
-      {Key key, this.list, this.symmetry, this.itemCount, Widget child})
-      : super(key: key, child: child);
+  DataListInherited({
+    Key? key,
+    this.list = const [],
+    required this.symmetry,
+    this.itemCount = 0,
+    required Widget child,
+  }) : super(key: key, child: child);
 
   final List<DataList> list;
   final bool symmetry;
@@ -249,18 +247,18 @@ class DataListInherited extends InheritedWidget {
   /*static DataListInherited of(BuildContext context) =>
       context.inheritFromWidgetOfExactType(DataListInherited);*/
   static DataListInherited of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType();
+      context.dependOnInheritedWidgetOfExactType()!;
 }
 
 /// Data List
 class DataList extends ValueNotifier implements Item {
-  DataList(
-      {@required this.title,
-      this.index,
-      bool highlights = false,
-      bool active = true,
-      this.customData})
-      : _showDuplicate = highlights,
+  DataList({
+    required this.title,
+    required this.index,
+    bool highlights = false,
+    bool active = true,
+    this.customData,
+  })  : _showDuplicate = highlights,
         _active = active,
         super(active);
 
@@ -268,7 +266,7 @@ class DataList extends ValueNotifier implements Item {
   final dynamic customData;
   final int index;
 
-  get showDuplicate {
+  bool get showDuplicate {
     final val = _showDuplicate;
     _showDuplicate = false;
     return val;
@@ -281,7 +279,7 @@ class DataList extends ValueNotifier implements Item {
     notifyListeners();
   }
 
-  get active => _active;
+  bool get active => _active;
   bool _active;
   set active(bool a) {
     _active = a;
